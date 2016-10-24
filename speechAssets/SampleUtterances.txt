@@ -1,0 +1,3 @@
+Forecast weather in {cityName}
+Forecast about the weather in {cityName}
+Forecast for the weather in {cityName}
