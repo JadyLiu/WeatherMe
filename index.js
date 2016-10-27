@@ -6,7 +6,7 @@ var Geocoder = Promise.promisifyAll(require('geocoder'));
 var AWS = require("aws-sdk");
 
 var config = require('dotenv').config();
-var API_KEY = ''
+var API_KEY = '';
 
 /**
  * This sample shows how to create a simple Lambda function for handling speechlet requests.
@@ -133,7 +133,7 @@ function setForecastInSession(intent, session, callback) {
 
     fetch(intent.slots.cityName.value).then(function (data) {
       console.log(data.temp.speech);
-      var speechOutput = data.temp.speech;
+      var speechOutput = data.hourSummary;
       var repromptText = "";
       var shouldEndSession = true;
       var sessionAttributes = {};
@@ -152,15 +152,20 @@ function setForecastInSession(intent, session, callback) {
 
 function fetch(location) {
   location = location || config.DEFAULT_LOCATION;
+  var options = {
+  units: 'si'
+  };
 
   return Geocoder.geocodeAsync(location).then(function (data) {
     var coord = data.results[0].geometry.location;
     //var forecastIo = new ForecastIo(config.API_KEY);
     var forecastIo = new ForecastIo(API_KEY);
-    return forecastIo.forecast(coord.lat, coord.lng);
+    return forecastIo.forecast(coord.lat, coord.lng, options);
   })
   .then(function(data) {
     var currently = data.currently;
+    var minutely = data.minutely;
+    var hourly = data.hourly;
     var temp = Math.round(currently.temperature);
     var feelsLike = Math.round(currently.apparentTemperature);
 
@@ -173,9 +178,11 @@ function fetch(location) {
         speech: 'Feels like ' + feelsLike + ' degrees.',
         value: feelsLike
       },
-      // hourSummary: data.minutely.summary,
-      // daySummary: data.hourly.summary,
-      // weekSummary: data.daily.summary
+      hourSummary: {
+        value: data.hourly.summary
+      },
+      daySummary: data.daily.summary,
+      weekSummary: data.weekly.summary
     }
   });
 }
