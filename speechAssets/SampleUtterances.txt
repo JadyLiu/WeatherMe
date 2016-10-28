@@ -1,3 +1,23 @@
-Forecast weather in {cityName}
-Forecast about the weather in {cityName}
-Forecast for the weather in {cityName}
+Forecast what is weather in {cityName}
+Forecast what about the weather in {cityName}
+Forecast what the weather is in {cityName}
+Forecast what its like in {cityName}
+Forecast forecast in {cityName}
+Forecast whats the forecast in {cityName}
+Forecast what are the conditions in {cityName}
+
+ForecastToday what is weather in {cityName} for today
+ForecastToday what about the weather in {cityName} for today
+ForecastToday what the weather is in {cityName} for today
+ForecastToday what its like in {cityName} for today
+ForecastToday forecast in {cityName} for today
+ForecastToday whats the forecast in {cityName} for today
+ForecastToday what are the conditions in {cityName} today
+
+ForecastWeek what is weather in {cityName} for this week
+ForecastWeek what about the weather in {cityName} for this week
+ForecastWeek what the weather is in {cityName} for this week
+ForecastWeek what its like in {cityName} for this week
+ForecastWeek forecast in {cityName} for this week
+ForecastWeek whats the forecast in {cityName} for this week
+ForecastWeek what are the conditions in {cityName} this week

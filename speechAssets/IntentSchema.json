@@ -10,6 +10,24 @@
       ]
     },
     {
+      "intent": "ForecastToday",
+      "slots": [
+        {
+          "name": "cityName",
+          "type": "LIST_cityName"
+        }
+      ]
+    },
+    {
+      "intent": "ForecastWeek",
+      "slots": [
+        {
+          "name": "cityName",
+          "type": "LIST_cityName"
+        }
+      ]
+    },
+    {
       "intent": "AMAZON.HelpIntent"
     }
   ]

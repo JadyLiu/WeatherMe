@@ -1,12 +1,10 @@
 'use strict';
 
+var AWS = require("aws-sdk");
 var Promise = require('bluebird');
 var ForecastIo = require('forecastio');
 var Geocoder = Promise.promisifyAll(require('geocoder'));
-var AWS = require("aws-sdk");
-
 var config = require('dotenv').config();
-var API_KEY = '';
 
 /**
  * This sample shows how to create a simple Lambda function for handling speechlet requests.
@@ -72,6 +70,12 @@ function onIntent(intentRequest, session, callback) {
     if ("Forecast" === intentName) {
         console.log("Forecast received");
         setForecastInSession(intent, session, callback);
+    } else if ("ForecastToday" === intentName) {
+        console.log("ForecastToday received");
+        setForecastTodayInSession(intent, session, callback);
+    } else if ("ForecastWeek" === intentName) {
+        console.log("ForecastWeek received");
+        setForecastWeekInSession(intent, session, callback);
     } else if ("AMAZON.HelpIntent" === intentName) {
         getWelcomeResponse(callback);
     } else {
@@ -94,7 +98,7 @@ function getWelcomeResponse(callback) {
     var sessionAttributes = {};
     var speechOutput = "Hello JD " +
         "Happy to find out weather status for you";
-    var repromptText = "Tell me what would you like to know";
+    var repromptText = {};
     var shouldEndSession = false;
 
     callback(sessionAttributes,
@@ -126,14 +130,13 @@ function buildResponse(sessionAttributes, speechletResponse) {
 }
 
 /**
- * Function of forcast
+ * Function of Forcast
  */
 function setForecastInSession(intent, session, callback) {
     console.log(intent);
 
     fetch(intent.slots.cityName.value).then(function (data) {
-      console.log(data.temp.speech);
-      var speechOutput = data.hourSummary;
+      var speechOutput = data.temp.speech + data.windSpeed.speech + data.apparentTemp.speech;
       var repromptText = "";
       var shouldEndSession = true;
       var sessionAttributes = {};
@@ -141,12 +144,42 @@ function setForecastInSession(intent, session, callback) {
       callback(sessionAttributes,
           buildSpeechletResponse(speechOutput, repromptText, shouldEndSession));
 
-    // response
-    //   .say(data.temp.speech)
-    //   .say(data.feelsLike.speech)
-    //   .say(data.hourSummary)
-    //   .say(data.daySummary)
-    //   .send();
+  });
+}
+
+/**
+ * Function of ForcastToday
+ */
+function setForecastTodayInSession(intent, session, callback) {
+    console.log(intent);
+
+    fetch(intent.slots.cityName.value).then(function (data) {
+      var speechOutput = data.hourlyData.speech;
+      var repromptText = "";
+      var shouldEndSession = true;
+      var sessionAttributes = {};
+                    
+      callback(sessionAttributes,
+          buildSpeechletResponse(speechOutput, repromptText, shouldEndSession));
+
+  });
+}
+
+/**
+ * Function of ForcastToday
+ */
+function setForecastWeekInSession(intent, session, callback) {
+    console.log(intent);
+
+    fetch(intent.slots.cityName.value).then(function (data) {
+      var speechOutput = data.dailyData.speech;
+      var repromptText = "";
+      var shouldEndSession = true;
+      var sessionAttributes = {};
+                    
+      callback(sessionAttributes,
+          buildSpeechletResponse(speechOutput, repromptText, shouldEndSession));
+
   });
 }
 
@@ -158,31 +191,38 @@ function fetch(location) {
 
   return Geocoder.geocodeAsync(location).then(function (data) {
     var coord = data.results[0].geometry.location;
-    //var forecastIo = new ForecastIo(config.API_KEY);
-    var forecastIo = new ForecastIo(API_KEY);
+    var forecastIo = new ForecastIo(config.API_KEY);
     return forecastIo.forecast(coord.lat, coord.lng, options);
   })
   .then(function(data) {
     var currently = data.currently;
-    var minutely = data.minutely;
-    var hourly = data.hourly;
     var temp = Math.round(currently.temperature);
-    var feelsLike = Math.round(currently.apparentTemperature);
+    var windSpeed = currently.windSpeed
+    var apparentTemp = Math.round(currently.apparentTemperature);
+    var hourlyData = data.hourly;
+    var dailyData = data.daily;
 
     return {
       temp: {
-        speech: 'It\'s currently ' + temp + ' degrees.',
+        speech: 'It\'s currently ' + temp + ' degrees. ',
         value: temp
       },
-      feelsLike: (feelsLike && Math.abs(feelsLike - temp) > config.FEELS_LIKE_THRESHOLD) && {
-        speech: 'Feels like ' + feelsLike + ' degrees.',
-        value: feelsLike
+      windSpeed: {
+        speech: 'and the wind speed is ' + windSpeed + ' Meters per second. ',
+        value: windSpeed
       },
-      hourSummary: {
-        value: data.hourly.summary
+      apparentTemp: {
+        speech: 'You might feels like ' + apparentTemp + ' degrees. ',
+        value: apparentTemp
       },
-      daySummary: data.daily.summary,
-      weekSummary: data.weekly.summary
+      hourlyData: {
+        speech: 'Today in summary ' + hourlyData.summary,
+        value: hourlyData.summary
+      },
+      dailyData: {
+        speech: 'This week in summary ' + dailyData.summary,
+        value: dailyData.summary
+      },
     }
   });
 }
