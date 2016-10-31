@@ -107,14 +107,23 @@ function fetchForecast(intent, session, response) {
       //var speechOutput = data.temp.speech + data.windSpeed.speech + data.apparentTemp.speech;
 
       var speechOutput = "<speak>" + data.temp.speech + 
-        "<break time=\"0.2s\" />" + data.windSpeed.speech
-        "<break time=\"0.2s\" />" + data.apparentTemp.speech
-        "<break time=\"0.2s\" /> your timezone is" + data.timezone.speech
+        "<break time=\"0.2s\" />" + data.windSpeed.speech +
+        "<break time=\"0.2s\" />" + data.apparentTemp.speech +
+        "<break time=\"0.2s\" /> your location is" + data.timezone.speech +
         "</speak>";
-      var repromptText = "Would like to get other information ?";
-      var shouldEndSession = true;
+      var repromptOutput = "Would like to get other information ?";
       var sessionAttributes = {};
-                    
+
+      speechOutput = {
+            speech: speechOutput,
+            type: AlexaSkill.speechOutputType.SSML
+        };
+
+      repromptOutput = {
+            speech: repromptOutput,
+            type: AlexaSkill.speechOutputType.PLAIN_TEXT
+        };
+            
       response.ask(speechOutput, repromptOutput);
 
   });
@@ -130,8 +139,7 @@ function fetchForecastToday(intent, session, response) {
 
     fetch(cityName.value).then(function (data) {
       var speechOutput = data.hourlyData.speech;
-      var repromptText = "Would like to get other information ?";
-      var shouldEndSession = true;
+      var repromptOutput = "Would like to get other information ?";
       var sessionAttributes = {};
                     
       response.ask(speechOutput, repromptOutput);
@@ -149,8 +157,7 @@ function fetchForecastWeek(intent, session, response) {
 
     fetch(cityName.value).then(function (data) {
       var speechOutput = data.dailyData.speech;
-      var repromptText = "Would like to get other information ?";
-      var shouldEndSession = true;
+      var repromptOutput = "Would like to get other information ?";
       var sessionAttributes = {};
                     
       response.ask(speechOutput, repromptOutput);
