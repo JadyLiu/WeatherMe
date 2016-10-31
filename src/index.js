@@ -73,14 +73,13 @@ WeatherMe.prototype.intentHandlers = {
 function getWelcomeResponse(response) {
     // If we wanted to initialize the session to have some attributes we could add those here.
     var speechText = "Hello JD " +
-        "Happy to find out weather status for you";
+        "Happy to find out weather status for you, you can ask weather for now, today, and this week ";
 
-    var repromptText = {};
-    // var repromptText = "<speak>Please choose a category by saying, " +
-    //     "books <break time=\"0.2s\" /> " +
-    //     "fashion <break time=\"0.2s\" /> " +
-    //     "movie <break time=\"0.2s\" /> " +
-    //     "kitchen</speak>";
+    var repromptText = "<speak> For your instruction, you can say" +
+        "<break time=\"0.2s\" /> Alexa, ask weather me what is the weather in sydney" +
+        "<break time=\"0.2s\" /> or Alexa, ask weather me what is the weather in sydney for today" +
+        "<break time=\"0.2s\" /> or Alexa, ask weather me what is the weather in sydney for this week" +
+        "</speak>";
 
     var speechOutput = {
         speech: speechText,
@@ -96,22 +95,27 @@ function getWelcomeResponse(response) {
 /**
  * Function of Forcast
  */
-function fetchForecast(intent, session, callback) {
+function fetchForecast(intent, session, response) {
     console.log("fetchForecast function");
 
     var cityName = intent.slots.cityName;
-    var repromptText = "";
     var sessionAttributes = {};
 
     console.log(cityName.value);
 
     fetch(cityName.value).then(function (data) {
-      var speechOutput = data.temp.speech + data.windSpeed.speech + data.apparentTemp.speech;
-      var repromptText = "";
+      //var speechOutput = data.temp.speech + data.windSpeed.speech + data.apparentTemp.speech;
+
+      var speechOutput = "<speak>" + data.temp.speech + 
+        "<break time=\"0.2s\" />" + data.windSpeed.speech
+        "<break time=\"0.2s\" />" + data.apparentTemp.speech
+        "<break time=\"0.2s\" /> your timezone is" + data.timezone.speech
+        "</speak>";
+      var repromptText = "Would like to get other information ?";
       var shouldEndSession = true;
       var sessionAttributes = {};
                     
-      response.tell(speechOutput);
+      response.ask(speechOutput, repromptOutput);
 
   });
 }
@@ -119,19 +123,18 @@ function fetchForecast(intent, session, callback) {
 /**
  * Function of ForcastToday
  */
-function fetchForecastToday(intent, session, callback) {
+function fetchForecastToday(intent, session, response) {
 
     var cityName = intent.slots.cityName;
-    var repromptText = "";
     var sessionAttributes = {};
 
     fetch(cityName.value).then(function (data) {
       var speechOutput = data.hourlyData.speech;
-      var repromptText = "";
+      var repromptText = "Would like to get other information ?";
       var shouldEndSession = true;
       var sessionAttributes = {};
                     
-      response.tell(speechOutput);
+      response.ask(speechOutput, repromptOutput);
 
   });
 }
@@ -139,19 +142,18 @@ function fetchForecastToday(intent, session, callback) {
 /**
  * Function of ForcastToday
  */
-function fetchForecastWeek(intent, session, callback) {
+function fetchForecastWeek(intent, session, response) {
     
     var cityName = intent.slots.cityName;
-    var repromptText = "";
     var sessionAttributes = {};
 
     fetch(cityName.value).then(function (data) {
       var speechOutput = data.dailyData.speech;
-      var repromptText = "";
+      var repromptText = "Would like to get other information ?";
       var shouldEndSession = true;
       var sessionAttributes = {};
                     
-      response.tell(speechOutput);
+      response.ask(speechOutput, repromptOutput);
 
   });
 }
@@ -171,6 +173,7 @@ function fetch(location) {
   })
   .then(function(data) {
     var currently = data.currently;
+    var timezone = data.timezone;
     var temp = Math.round(currently.temperature);
     var windSpeed = currently.windSpeed
     var apparentTemp = Math.round(currently.apparentTemperature);
@@ -181,6 +184,10 @@ function fetch(location) {
       temp: {
         speech: 'It\'s currently ' + temp + ' degrees. ',
         value: temp
+      },
+      timezone: {
+        speech: 'The timezone is' + timezone ,
+        value: timezone
       },
       windSpeed: {
         speech: 'and the wind speed is ' + windSpeed + ' Meters per second. ',
